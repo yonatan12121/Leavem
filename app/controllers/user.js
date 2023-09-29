@@ -1,15 +1,16 @@
 const User = require("../models/user");
-const passwordHash = require("password-hash");
+
+const bcrypt = require("bcryptjs");
 
 // Controller: Create a user
 const createUser = async (req, res) => {
   // console.log(req);
     const role="user";
     const { email,fullName, password,studied,department,employment_date } = req.body;
-
+    const encreptedPassword = await bcrypt.hash(password, 10);
     try {
       // Check if email already exists
-      const existingUser = await User.findOne({ email: req.body.email });
+      const existingUser = await User.findOne({ email:email });
       if (existingUser) {
         return res.status(400).json({ msg: "Email already exists" });
       }
@@ -26,14 +27,14 @@ const createUser = async (req, res) => {
       //     : Math.floor(employmentDurationInMonths * 1.3);
 
       const user = new User({
-        name: req.body.name,
-        email: req.body.email,
+        name: fullName,
+        email: email,
         photo: "http://localhost:5000" + "/upload/" + req.file.filename,
-        studied: req.body.studied,
+        studied: studied,
         role: role,
-        password: req.body.password ,
-        department_id: req.body.department_id,
-        employment_date: req.body.employment_date,
+        password: encreptedPassword ,
+        department_id: department,
+        employment_date: employment_date,
         employment_status: "active",
         total_leaves:16,
       });
@@ -55,10 +56,10 @@ const createUser = async (req, res) => {
   
 };
 
-//return its own data
+// return its own data
 const getMe = (req, res) => {
-  const id = req.user.user_id;
-  User.findById(id)
+  const email = req.user.email;
+  User.findOne(id)
     .then((user) => {
       if (!user) {
         res.status(404).json({ error: "User not found" });

@@ -3,11 +3,13 @@ const jwt = require("jsonwebtoken");
 const passwordHash = require("password-hash");
 
 // Controller: User login
-const login = (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
 console.log(email, password);
+console.log("hellooo");
   //find the user by email
-  User.findOne({ email }).then((user) => {
+  const user = await User.findOne({ email });
+  console.log(user);
     if (!user) {
       return res.status(404).json({ error: "user not found" });
     }
@@ -16,10 +18,11 @@ console.log(email, password);
     if (password === user.password) {
       const token = jwt.sign(
         {
-          user_id: user._id,
+          email: user.email,
           role: user.role,
+          data:user
         },
-        process.env.TOKEN_KEY,
+        process.env.JWT_SECRET,
         { expiresIn: "9h" }
       );
 
@@ -28,7 +31,7 @@ console.log(email, password);
       console.log("wrong password");
       return res.status(200).json({ msg: "wrong password" });
     }
-  });
+ 
 };
 
 module.exports = {
