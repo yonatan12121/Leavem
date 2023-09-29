@@ -4,8 +4,8 @@ const passwordHash = require("password-hash");
 // Controller: Create a user
 const createUser = async (req, res) => {
   // console.log(req);
-
-  if (req.user.role === "hr" || req.user.role === "admin") {
+    const role="user";
+  if (role === "user") {
     try {
       // Check if email already exists
       const existingUser = await User.findOne({ email: req.body.email });
@@ -29,7 +29,7 @@ const createUser = async (req, res) => {
         email: req.body.email,
         photo: "http://localhost:5000" + "/upload/" + req.file.filename,
         studied: req.body.studied,
-        role: req.body.role,
+        role: role,
         password: req.body.password ,
         department_id: req.body.department_id,
         employment_date: req.body.employment_date,
