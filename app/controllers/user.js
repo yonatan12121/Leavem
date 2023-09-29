@@ -15,16 +15,13 @@ const createUser = async (req, res) => {
         return res.status(400).json({ msg: "Email already exists" });
       }
 
-      // const employmentDate = new Date(req.body.employment_date);
-      // const currentDate = new Date();
-      // const employmentDurationInMonths =
-      //   (currentDate.getFullYear() - employmentDate.getFullYear()) * 12 +
-      //   (currentDate.getMonth() - employmentDate.getMonth());
+      const employmentDate = new Date(req.body.employment_date);
+      const currentDate = new Date();
+      const employmentDurationInMonths =
+        (currentDate.getFullYear() - employmentDate.getFullYear()) * 12 +
+        (currentDate.getMonth() - employmentDate.getMonth());
 
-      // const totalLeaves =
-      //   employmentDurationInMonths >= 12
-      //     ? 16
-      //     : Math.floor(employmentDurationInMonths * 1.3);
+      const totalLeaves = employmentDurationInMonths >= 12 ? 16 : employmentDurationInMonths >= 24 ? 18 : Math.floor(employmentDurationInMonths * 1.3);
 
       const user = new User({
         name: fullName,
@@ -36,7 +33,7 @@ const createUser = async (req, res) => {
         department_id: department,
         employment_date: employment_date,
         employment_status: "active",
-        total_leaves:16,
+        total_leaves:totalLeaves,
       });
 
       await user
