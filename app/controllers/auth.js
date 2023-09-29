@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const passwordHash = require("password-hash");
+const bcrypt = require("bcryptjs");
 
 // Controller: User login
 const login = async (req, res) => {
@@ -15,7 +16,7 @@ console.log("hellooo");
     }
 
     //compare the provided password
-    if (password === user.password) {
+    if (await bcrypt.compare(password, user.password)) {
       const token = jwt.sign(
         {
           email: user.email,
