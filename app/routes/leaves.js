@@ -2,11 +2,30 @@ const express = require("express");
 const router = express.Router();
 const leavesController = require("../controllers/leaves");
 
+
+const multer = require("multer");
+
 // Route: GET /leaves
 router.get("/", leavesController.getAllLeaves);
 
+
+
+
 // Route: POST /leaves
-router.post("/", leavesController.createLeave);
+
+
+const storagele = multer.diskStorage({
+    destination: "./app/upload/request",
+    filename: function (req, file, cb) {
+      const fileName = file.originalname.toLocaleLowerCase().split(" ").join("-");
+      cb(null, Date.now() + fileName);
+    },
+  });
+
+const uploadle = multer({ storage: storagele });
+
+
+router.post("/request",uploadle.single("photo"), leavesController.createLeave);
 
 // Route: GET /leaves/:id
 router.get("/:id", leavesController.getLeaveById);

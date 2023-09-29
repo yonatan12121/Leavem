@@ -105,11 +105,11 @@ const getAllLeaves = async (req, res) => {
 
 // Controller: Create a leave
 const createLeave = async (req, res) => {
-  const { user_id, leave_type_id, start_date, end_date, reason } = req.body;
+  const { email, leave_type, start_date, end_date, reason } = req.body;
 
   try {
     // Get the user from user_id
-    const user = await User.findById(user_id);
+    const user = await User.findById(email);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -117,7 +117,7 @@ const createLeave = async (req, res) => {
 
     // Check if user already has a pending leave
     const hasPendingLeave = await Leave.exists({
-      user_id,
+      email,
       status: "pending",
     });
 
@@ -142,21 +142,17 @@ const createLeave = async (req, res) => {
     }
 
     const leave = new Leave({
-      user_id,
-      leave_type_id,
-      start_date,
-      end_date,
-      reason,
+      email:email,
+      photo:"http://localhost:5000" + "/upload/request/" + req.file.filename,
+      leave_type:leave_type,
+      start_date:start_date,
+      end_date:end_date,
+      reason:reason,
       status: "pending", // Set the default status as 'pending'
     });
 
     leave.save().then((savedLeave) => {
       // Decrement the leave balance of the user
-      user.total_leaves -= leaveDuration;
-      if (leaveDuration < 1) {
-        user.total_leaves -= 0.5;
-      }
-      user.save();
 
       res.status(201).json(savedLeave);
     });
