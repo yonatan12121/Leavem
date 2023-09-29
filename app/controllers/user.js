@@ -5,7 +5,8 @@ const passwordHash = require("password-hash");
 const createUser = async (req, res) => {
   // console.log(req);
     const role="user";
-  if (role === "user") {
+    const { email,fullName, password,studied,department,employment_date } = req.body;
+
     try {
       // Check if email already exists
       const existingUser = await User.findOne({ email: req.body.email });
@@ -13,16 +14,16 @@ const createUser = async (req, res) => {
         return res.status(400).json({ msg: "Email already exists" });
       }
 
-      const employmentDate = new Date(req.body.employment_date);
-      const currentDate = new Date();
-      const employmentDurationInMonths =
-        (currentDate.getFullYear() - employmentDate.getFullYear()) * 12 +
-        (currentDate.getMonth() - employmentDate.getMonth());
+      // const employmentDate = new Date(req.body.employment_date);
+      // const currentDate = new Date();
+      // const employmentDurationInMonths =
+      //   (currentDate.getFullYear() - employmentDate.getFullYear()) * 12 +
+      //   (currentDate.getMonth() - employmentDate.getMonth());
 
-      const totalLeaves =
-        employmentDurationInMonths >= 12
-          ? 16
-          : Math.floor(employmentDurationInMonths * 1.3);
+      // const totalLeaves =
+      //   employmentDurationInMonths >= 12
+      //     ? 16
+      //     : Math.floor(employmentDurationInMonths * 1.3);
 
       const user = new User({
         name: req.body.name,
@@ -34,7 +35,7 @@ const createUser = async (req, res) => {
         department_id: req.body.department_id,
         employment_date: req.body.employment_date,
         employment_status: "active",
-        total_leaves: totalLeaves,
+        total_leaves:16,
       });
 
       await user
@@ -51,11 +52,7 @@ const createUser = async (req, res) => {
       console.log(error);
       res.status(500).json(error);
     }
-  } else {
-    res
-      .status(401)
-      .json({ msg: "You're not authorized to perform this task." });
-  }
+  
 };
 
 //return its own data

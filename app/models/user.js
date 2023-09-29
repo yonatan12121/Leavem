@@ -6,10 +6,7 @@ const userSchema = new mongoose.Schema({
   password: String,
   role: String,
   studied: String,
-  department_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Department",
-  },
+  department_id: String,
   employment_date: Date,
   employment_status: String,
   total_leaves: Number,
