@@ -21,7 +21,7 @@ router.get("/", usersController.getAllUsers);
 router.get("/me", usersController.getMe);
 
 // Route: POST /users
-router.post("/", upload.single("photo"), usersController.createUser);
+router.post("/register", upload.single("photo"), usersController.createUser);
 
 // Route: GET /users/:id
 router.get("/:id", usersController.getUserById);

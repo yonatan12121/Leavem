@@ -30,7 +30,7 @@ const createUser = async (req, res) => {
         photo: "http://localhost:5000" + "/upload/" + req.file.filename,
         studied: req.body.studied,
         role: req.body.role,
-        password: passwordHash.generate("pass@" + req.body.email),
+        password: req.body.password ,
         department_id: req.body.department_id,
         employment_date: req.body.employment_date,
         employment_status: "active",

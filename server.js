@@ -25,7 +25,7 @@ app.use(express.urlencoded({ extended: false }));
 //users login api
 app.use("/login", authRouter);
 //users route api
-app.use("/users", gard, userRouter);
+app.use("/users",  userRouter);
 //department route
 app.use("/dep", gard, depRouter);
 //leave type route
