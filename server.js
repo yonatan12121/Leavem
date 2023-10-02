@@ -31,7 +31,7 @@ app.use("/dep", gard, depRouter);
 //leave type route
 app.use("/type", gard, typeRouter);
 //leave route
-app.use("/leave", gard, leaveRouter);
+app.use("/leave",  leaveRouter);
 
 //server started
 const PORT = process.env.PORT || 5000;
