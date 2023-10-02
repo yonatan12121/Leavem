@@ -71,19 +71,17 @@ const getMe = (req, res) => {
 
 // Controller: Get all users
 const getAllUsers = (req, res) => {
-  if (req.user.role === "hr" || req.user.role === "admin") {
+ 
     User.find()
       .then((users) => {
         res.json(users);
       })
       .catch((error) => {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: "Internal server error",error });
       });
-  } else {
-    res
-      .status(401)
-      .json({ msg: "you're not authorized to perform this task'" });
-  }
+
+
+  
 };
 
 // Controller: Get a user by ID

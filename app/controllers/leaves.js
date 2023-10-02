@@ -2,106 +2,120 @@ const Leave = require("../models/leave");
 const User = require("../models/user");
 
 // Controller: Get all leaves with pagination
-const getAllLeaves = async (req, res) => {
-  try {
-    if (req.user.role === "hr" || req.user.role === "admin") {
-      const { page, limit } = req.query;
-      const pageNumber = parseInt(page) || 1;
-      const pageSize = parseInt(limit) || 10;
+// const getAllLeaves = async (req, res) => {
+//   try {
+//     if (req.user.role === "hr" || req.user.role === "admin") {
+//       const { page, limit } = req.query;
+//       const pageNumber = parseInt(page) || 1;
+//       const pageSize = parseInt(limit) || 10;
 
-      const totalLeaves = await Leave.countDocuments();
-      const totalPages = Math.ceil(totalLeaves / pageSize);
+//       const totalLeaves = await Leave.countDocuments();
+//       const totalPages = Math.ceil(totalLeaves / pageSize);
 
-      /*
-      const leaves = await Leave.find()
-        .sort({ createdAt: -1 })
-        .skip((pageNumber - 1) * pageSize)
-        .limit(pageSize);
-        */
-      const leaves = await Leave.aggregate([
-        {
-          $sort: { createdAt: -1 },
-        },
-        {
-          $skip: (pageNumber - 1) * pageSize,
-        },
-        {
-          $limit: pageSize,
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "user_id",
-            foreignField: "_id",
-            as: "user",
-          },
-        },
-        {
-          $unwind: "$user",
-        },
-        {
-          $lookup: {
-            from: "leavetypes",
-            localField: "leave_type_id",
-            foreignField: "_id",
-            as: "leave_type",
-          },
-        },
-        {
-          $unwind: "$leave_type",
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "approver_id",
-            foreignField: "_id",
-            as: "approver",
-          },
-        },
-        {
-          $unwind: {
-            path: "$approver",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $project: {
-            _id: 1,
-            start_date: 1,
-            end_date: 1,
-            reason: 1,
-            status: 1,
-            createdAt: 1,
-            remarks: 1,
-            leave_type_id: 1,
-            approveBy: 1,
-            "user._id": 1,
-            "user.name": 1,
-            "user.email": 1,
-            "leave_type.name": 1,
-            "leave_type.description": 1,
-            "approver._id": 1,
-            "approver.name": 1,
-            "approver.email": 1,
-          },
-        },
-      ]);
+//       /*
+//       const leaves = await Leave.find()
+//         .sort({ createdAt: -1 })
+//         .skip((pageNumber - 1) * pageSize)
+//         .limit(pageSize);
+//         */
+//       const leaves = await Leave.aggregate([
+//         {
+//           $sort: { createdAt: -1 },
+//         },
+//         {
+//           $skip: (pageNumber - 1) * pageSize,
+//         },
+//         {
+//           $limit: pageSize,
+//         },
+//         {
+//           $lookup: {
+//             from: "users",
+//             localField: "user_id",
+//             foreignField: "_id",
+//             as: "user",
+//           },
+//         },
+//         {
+//           $unwind: "$user",
+//         },
+//         {
+//           $lookup: {
+//             from: "leavetypes",
+//             localField: "leave_type_id",
+//             foreignField: "_id",
+//             as: "leave_type",
+//           },
+//         },
+//         {
+//           $unwind: "$leave_type",
+//         },
+//         {
+//           $lookup: {
+//             from: "users",
+//             localField: "approver_id",
+//             foreignField: "_id",
+//             as: "approver",
+//           },
+//         },
+//         {
+//           $unwind: {
+//             path: "$approver",
+//             preserveNullAndEmptyArrays: true,
+//           },
+//         },
+//         {
+//           $project: {
+//             _id: 1,
+//             start_date: 1,
+//             end_date: 1,
+//             reason: 1,
+//             status: 1,
+//             createdAt: 1,
+//             remarks: 1,
+//             leave_type_id: 1,
+//             approveBy: 1,
+//             "user._id": 1,
+//             "user.name": 1,
+//             "user.email": 1,
+//             "leave_type.name": 1,
+//             "leave_type.description": 1,
+//             "approver._id": 1,
+//             "approver.name": 1,
+//             "approver.email": 1,
+//           },
+//         },
+//       ]);
 
-      res.json(leaves);
-      /**
-       *  currentPage: pageNumber,
-        totalPages,
-        totalLeaves,
-       */
-    } else {
-      res
-        .status(401)
-        .json({ msg: "You're not authorized to perform this task" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
+//       res.json(leaves);
+//       /**
+//        *  currentPage: pageNumber,
+//         totalPages,
+//         totalLeaves,
+//        */
+//     } else {
+//       res
+//         .status(401)
+//         .json({ msg: "You're not authorized to perform this task" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+//
+const getAllLeaves = (req, res) => {
+ 
+    Leave.find()
+      .then((leaves) => {
+        res.json(leaves);
+      })
+      .catch((error) => {
+        res.status(500).json({ error: "Internal server error" ,error});
+      });
+
 };
+
+
 
 // Controller: Create a leave
 const createLeave = async (req, res) => {
@@ -129,16 +143,16 @@ const createLeave = async (req, res) => {
     }
 
     // Calculate the duration of the leave in days
-    const leaveDuration = 0;
+    let leaveDuration = 0; // Change to let to allow reassignment
     const startDate = new Date(start_date);
     const endDate = new Date(end_date);
     const oneDay = 24 * 60 * 60 * 1000;
-    if (startDate === endDate && duration === "0.5") {
+
+    if (startDate.getTime() === endDate.getTime() && duration === "0.5") {
       leaveDuration = 0.5;
     } else {
       leaveDuration = Math.round(Math.abs(endDate - startDate) / oneDay) + 1;
     }
-    console.log("leave duration ===============>", leaveDuration);
 
     // Check if user has enough leave balance
     if (user.total_leaves < leaveDuration) {
@@ -162,9 +176,12 @@ const createLeave = async (req, res) => {
       res.status(201).json(savedLeave);
     });
   } catch (error) {
+    // Log the error message to the console for debugging
+    console.error("Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 // Assuming you have a Leave model and a User model imported.
 

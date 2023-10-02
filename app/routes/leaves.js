@@ -27,7 +27,10 @@ const uploadle = multer({ storage: storagele });
 
 router.post("/request",uploadle.single("photo"), leavesController.createLeave);
 
-router.post("/aprove", leavesController.approveLeave);
+router.post("/approve", leavesController.approveLeave);
+
+router.post("/decline", leavesController.declineLeave);
+
 
 // Route: GET /leaves/:id
 router.get("/:id", leavesController.getLeaveById);
