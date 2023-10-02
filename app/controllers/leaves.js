@@ -105,13 +105,15 @@ const getAllLeaves = async (req, res) => {
 
 // Controller: Create a leave
 const createLeave = async (req, res) => {
-  const { email, duration, leave_type, start_date, end_date, reason } =
+  const { _id, email, duration, leave_type, start_date, end_date, reason } =
     req.body;
+  console.log(email, duration, leave_type, start_date, end_date, reason);
 
   try {
     // Get the user from user_id
-    const user = await User.findById(email);
-
+    console.log("hbhb");
+    const user = await User.findById(_id);
+    console.log("heheheh", user);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -129,22 +131,22 @@ const createLeave = async (req, res) => {
     }
 
     // Calculate the duration of the leave in days
-    const leaveDuration = 0;
+    let leaveDuration = 0;
     const startDate = new Date(start_date);
     const endDate = new Date(end_date);
     const oneDay = 24 * 60 * 60 * 1000;
-    if (startDate === endDate && duration === "0.5") {
+    if (startDate.getTime() === endDate.getTime() && duration === "0.5") {
       leaveDuration = 0.5;
     } else {
       leaveDuration = Math.round(Math.abs(endDate - startDate) / oneDay) + 1;
     }
     console.log("leave duration ===============>", leaveDuration);
-
+    console.log(user.total_leaves, leaveDuration);
     // Check if user has enough leave balance
     if (user.total_leaves < leaveDuration) {
       return res.status(400).json({ error: "Insufficient leave balance" });
     }
-
+    console.log(req.photo);
     const leave = new Leave({
       email: email,
       photo: "http://localhost:5000" + "/upload/request/" + req.file.filename,
@@ -155,12 +157,10 @@ const createLeave = async (req, res) => {
       reason: reason,
       status: "pending", // Set the default status as 'pending'
     });
-
-    leave.save().then((savedLeave) => {
-      // Decrement the leave balance of the user
-
-      res.status(201).json(savedLeave);
-    });
+    console.log(leave);
+    const savedLeave = await leave.save();
+    // Decrement the leave balance of the user
+    res.status(201).json(savedLeave);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
