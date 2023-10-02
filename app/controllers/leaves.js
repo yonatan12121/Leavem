@@ -208,8 +208,18 @@ const approveLeave = async (req, res) => {
     leave.status = "approved";
     await leave.save();
 
-    // Subtract the allowed leave days from user's total_leaves
+    // Decrement the allowed leave days from user's total_leaves
     user.total_leaves -= allowedLeaveDays;
+    await user.save();
+
+    // Create a notification entry for the user
+    const notification = {
+      text: "Your leave request has been approved.",
+      name: "Leave Request",
+      type: "approved",
+    };
+
+    user.Notification.push(notification);
     await user.save();
 
     res.status(200).json({ message: "Leave request approved successfully" });
@@ -218,9 +228,12 @@ const approveLeave = async (req, res) => {
   }
 };
 
+
+// Controller function to decline a leave request
 // Controller function to decline a leave request
 const declineLeave = async (req, res) => {
-  const leaveId = req.params.id; // Get the leave request ID from the URL parameter
+  // const leaveId = req.params.id; // Get the leave request ID from the URL parameter
+  const { leaveId, email, } = req.body;
 
   try {
     const leave = await Leave.findById(leaveId);
@@ -234,6 +247,26 @@ const declineLeave = async (req, res) => {
     // Update the status of the leave request to "declined"
     leave.status = "declined";
     await leave.save();
+
+    // Fetch the user's email from the leave request
+    
+
+    // Fetch the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Create a notification entry for the user
+    const notification = {
+      text: "Your leave request has been declined.",
+      name: "Leave Request",
+      type: "declined",
+    };
+
+    user.Notification.push(notification);
+    await user.save();
 
     res.status(200).json({ message: "Leave request declined successfully" });
   } catch (error) {
