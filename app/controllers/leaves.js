@@ -186,8 +186,9 @@ const createLeave = async (req, res) => {
 
 // Controller function to approve a leave request
 const approveLeave = async (req, res) => {
-  const { leaveId, email, allowedLeaveDays } = req.body;
-
+  const { data } = req.body;
+  const { leaveId, email, allowedLeaveDays } = data;
+console.log(leaveId, email, allowedLeaveDays);
   try {
     const leave = await Leave.findById(leaveId);
 
