@@ -106,7 +106,7 @@ const getAllLeaves = async (req, res) => {
 // Controller: Create a leave
 const createLeave = async (req, res) => {
   const { email, leave_type, start_date, end_date, reason } = req.body;
-
+console.log(email, leave_type, start_date, end_date, reason);
   try {
     // Get the user from user_id
     const user = await User.findById(email);
