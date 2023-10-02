@@ -105,7 +105,8 @@ const getAllLeaves = async (req, res) => {
 
 // Controller: Create a leave
 const createLeave = async (req, res) => {
-  const { email, leave_type, start_date, end_date, reason } = req.body;
+  const { email, duration, leave_type, start_date, end_date, reason } =
+    req.body;
 
   try {
     // Get the user from user_id
@@ -128,12 +129,15 @@ const createLeave = async (req, res) => {
     }
 
     // Calculate the duration of the leave in days
+    const leaveDuration = 0;
     const startDate = new Date(start_date);
     const endDate = new Date(end_date);
     const oneDay = 24 * 60 * 60 * 1000;
-    const leaveDuration =
-      Math.round(Math.abs(endDate - startDate) / oneDay) + 1;
-
+    if (startDate === endDate && duration === "0.5") {
+      leaveDuration = 0.5;
+    } else {
+      leaveDuration = Math.round(Math.abs(endDate - startDate) / oneDay) + 1;
+    }
     console.log("leave duration ===============>", leaveDuration);
 
     // Check if user has enough leave balance
@@ -142,12 +146,13 @@ const createLeave = async (req, res) => {
     }
 
     const leave = new Leave({
-      email:email,
-      photo:"http://localhost:5000" + "/upload/request/" + req.file.filename,
-      leave_type:leave_type,
-      start_date:start_date,
-      end_date:end_date,
-      reason:reason,
+      email: email,
+      photo: "http://localhost:5000" + "/upload/request/" + req.file.filename,
+      duration:leaveDuration,
+      leave_type: leave_type,
+      start_date: start_date,
+      end_date: end_date,
+      reason: reason,
       status: "pending", // Set the default status as 'pending'
     });
 
@@ -156,6 +161,65 @@ const createLeave = async (req, res) => {
 
       res.status(201).json(savedLeave);
     });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Assuming you have a Leave model and a User model imported.
+
+// Controller function to approve a leave request
+const approveLeave = async (req, res) => {
+  const { leaveId, email, allowedLeaveDays } = req.body;
+
+  try {
+    const leave = await Leave.findById(leaveId);
+
+    if (!leave) {
+      return res.status(404).json({ error: "Leave request not found" });
+    }
+
+    // Fetch the user's total_leaves by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // You can add logic here to check if the user has permission to approve leave requests
+
+    // Update the status of the leave request to "approved"
+    leave.status = "approved";
+    await leave.save();
+
+    // Subtract the allowed leave days from user's total_leaves
+    user.total_leaves -= allowedLeaveDays;
+    await user.save();
+
+    res.status(200).json({ message: "Leave request approved successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Controller function to decline a leave request
+const declineLeave = async (req, res) => {
+  const leaveId = req.params.id; // Get the leave request ID from the URL parameter
+
+  try {
+    const leave = await Leave.findById(leaveId);
+
+    if (!leave) {
+      return res.status(404).json({ error: "Leave request not found" });
+    }
+
+    // You can add logic here to check if the user has permission to decline leave requests
+
+    // Update the status of the leave request to "declined"
+    leave.status = "declined";
+    await leave.save();
+
+    res.status(200).json({ message: "Leave request declined successfully" });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -270,4 +334,6 @@ module.exports = {
   updateLeaveById,
   deleteLeaveById,
   getLeavesByUserId,
+  approveLeave,
+  declineLeave,
 };
