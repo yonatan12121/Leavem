@@ -104,18 +104,14 @@ const User = require("../models/user");
 // };
 //
 const getAllLeaves = (req, res) => {
- 
-    Leave.find()
-      .then((leaves) => {
-        res.json(leaves);
-      })
-      .catch((error) => {
-        res.status(500).json({ error: "Internal server error" ,error});
-      });
-
+  Leave.find()
+    .then((leaves) => {
+      res.json(leaves);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Internal server error", error });
+    });
 };
-
-
 
 // Controller: Create a leave
 const createLeave = async (req, res) => {
@@ -181,13 +177,13 @@ const createLeave = async (req, res) => {
   }
 };
 
-
 // Assuming you have a Leave model and a User model imported.
 
 // Controller function to approve a leave request
 const approveLeave = async (req, res) => {
-  const { leaveId, email, allowedLeaveDays } = req.body;
-
+  const { data } = req.body;
+  const { leaveId, email, allowedLeaveDays } = data;
+  console.log(leaveId, email, allowedLeaveDays);
   try {
     const leave = await Leave.findById(leaveId);
 
@@ -228,12 +224,12 @@ const approveLeave = async (req, res) => {
   }
 };
 
-
 // Controller function to decline a leave request
 // Controller function to decline a leave request
 const declineLeave = async (req, res) => {
   // const leaveId = req.params.id; // Get the leave request ID from the URL parameter
-  const { leaveId, email, } = req.body;
+  const { data } = req.body;
+  const { leaveId, email } = data;
 
   try {
     const leave = await Leave.findById(leaveId);
@@ -249,7 +245,6 @@ const declineLeave = async (req, res) => {
     await leave.save();
 
     // Fetch the user's email from the leave request
-    
 
     // Fetch the user by email
     const user = await User.findOne({ email });
