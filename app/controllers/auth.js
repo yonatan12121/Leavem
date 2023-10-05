@@ -8,8 +8,9 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 console.log(email, password);
 console.log("hellooo");
+const Id = email;
   //find the user by email
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ Id });
   console.log(user);
     if (!user) {
       return res.status(404).json({ error: "user not found" });

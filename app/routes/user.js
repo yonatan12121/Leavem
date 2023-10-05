@@ -23,6 +23,10 @@ router.get("/me", usersController.getMe);
 // Route: POST /users
 router.post("/register", upload.single("photo"), usersController.createUser);
 
+// Route: Post/update
+router.post("/updateUser", usersController.updateUser);
+
+
 // Route: GET /users/:id
 router.get("/:id", usersController.getUserById);
 

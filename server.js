@@ -27,7 +27,7 @@ app.use("/login", authRouter);
 //users route api
 app.use("/users",  userRouter);
 //department route
-app.use("/dep", gard, depRouter);
+app.use("/dep",  depRouter);
 //leave type route
 app.use("/type", gard, typeRouter);
 //leave route

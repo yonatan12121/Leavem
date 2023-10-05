@@ -15,6 +15,7 @@ const NotificationScehma = new mongoose.Schema(
 
 const userSchema = new mongoose.Schema({
   name: String,
+  Id:String,
   email: String,
   password: String,
   role: String,
