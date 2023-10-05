@@ -62,7 +62,7 @@ const updateUser = async (req, res) => {
     // const userId = req.params.id; // Get the user ID from the request params
 
     try {
-      const { email, department, studied, profilePicture,userId } = req.body; // Get updated fields from request body
+      const { email, department, studied, userId } = req.body; // Get updated fields from request body
 
       // Find the user by ID
       const user = await User.findById(userId);
