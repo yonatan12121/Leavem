@@ -115,9 +115,9 @@ const getAllLeaves = (req, res) => {
 
 // Controller: Create a leave
 const createLeave = async (req, res) => {
-  const { _id, email, duration, leave_type, start_date, end_date, reason } =
+  const { _id, Id, duration, leave_type, start_date, end_date, reason } =
     req.body;
-  console.log(email, duration, leave_type, start_date, end_date, reason);
+  console.log(Id, duration, leave_type, start_date, end_date, reason);
 
   try {
     // Get the user from user_id
@@ -130,7 +130,7 @@ const createLeave = async (req, res) => {
 
     // Check if user already has a pending leave
     const hasPendingLeave = await Leave.exists({
-      email,
+      Id,
       status: "pending",
     });
 
@@ -157,7 +157,7 @@ const createLeave = async (req, res) => {
     }
     console.log(req.photo);
     const leave = new Leave({
-      email: email,
+      Id: Id,
       photo: "http://localhost:5000" + "/upload/request/" + req.file.filename,
       duration: leaveDuration,
       leave_type: leave_type,
@@ -182,8 +182,8 @@ const createLeave = async (req, res) => {
 // Controller function to approve a leave request
 const approveLeave = async (req, res) => {
   const { data } = req.body;
-  const { leaveId, email, allowedLeaveDays } = data;
-  console.log(leaveId, email, allowedLeaveDays);
+  const { leaveId, Id, allowedLeaveDays } = data;
+  console.log(leaveId, Id, allowedLeaveDays);
   try {
     const leave = await Leave.findById(leaveId);
 
@@ -192,7 +192,7 @@ const approveLeave = async (req, res) => {
     }
 
     // Fetch the user's total_leaves by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ Id });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -229,7 +229,7 @@ const approveLeave = async (req, res) => {
 const declineLeave = async (req, res) => {
   // const leaveId = req.params.id; // Get the leave request ID from the URL parameter
   const { data } = req.body;
-  const { leaveId, email } = data;
+  const { leaveId, Id } = data;
 
   try {
     const leave = await Leave.findById(leaveId);
@@ -247,7 +247,7 @@ const declineLeave = async (req, res) => {
     // Fetch the user's email from the leave request
 
     // Fetch the user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ Id });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });

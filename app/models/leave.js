@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const leaveSchema = new mongoose.Schema({
-  email:String,
+  Id:String,
   leave_type: String,
   duration:String,
   start_date: Date,

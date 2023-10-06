@@ -1,12 +1,14 @@
 const User = require("../models/user");
 
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 // Controller: Create a user
 const createUser = async (req, res) => {
   // console.log(req);
     const role="user";
     const { email,fullName, password,studied,department,employment_date } = req.body;
+    console.log(email);
     const encreptedPassword = await bcrypt.hash(password, 10);
     try {
       // Check if email already exists
@@ -54,36 +56,23 @@ const createUser = async (req, res) => {
 };
 
 
+// Adjust the path to your user model
+
 
 
 const updateUser = async (req, res) => {
-  // Update user details by ID
-  
+  try {
     // const userId = req.params.id; // Get the user ID from the request params
+    const { email, department, studied,userId } = req.body; // Get updated fields from request body
+    console.log(email, department, studied,userId);
+    // Find the user by ID
+    const user = await User.findById(userId);
 
-    try {
-      const { email, department, studied, userId } = req.body; // Get updated fields from request body
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-      // Find the user by ID
-      const user = await User.findById(userId);
-
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      const multer = require("multer");
-
-      const storage = multer.diskStorage({
-        destination: "./app/upload",
-        filename: function (req, file, cb) {
-          const fileName = file.originalname.toLocaleLowerCase().split(" ").join("-");
-          cb(null, Date.now() + fileName);
-        },
-      });
-      
-      const upload = multer({ storage: storage });
-
-      upload.single("photo")
-      
+    // Handle profile picture upload
 
       // Update user fields if provided
       if (email) {
@@ -95,19 +84,33 @@ const updateUser = async (req, res) => {
       if (studied) {
         user.studied = studied;
       }
-      if (profilePicture) {
+      if (req.file) {
         user.photo = "http://localhost:5000" + "/upload/" + req.file.filename;
       }
+
 
       // Save the updated user
       await user.save();
 
-      res.status(200).json({ message: 'User updated successfully' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error' });
-    }
+      const token = jwt.sign(
+        {
+          email: user.email,
+          role: user.role,
+          data:user
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "9h" }
+      );
+
+      res.status(200).json({ message: 'User updated successfully',token:token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
+};
+
+
+
 
 
 
@@ -214,6 +217,45 @@ const deleteUserById = (req, res) => {
   }
 };
 
+
+const changePassword = async (req, res) => {
+  try {
+    const { userId, oldPassword, newPassword } = req.body;
+    console.log(userId, oldPassword, newPassword);
+
+    const encryptedPassword = await bcrypt.hash(oldPassword, 10);
+    const encryptedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if the old password matches the stored password
+    console.log(user.password, encryptedPassword);
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (isMatch) {
+      user.password = encryptedNewPassword;
+      await user.save();
+      res.status(200).json({ message: 'Password changed successfully' });
+      console.log("success");
+    } else {
+      console.log("error");
+      return res.status(401).json({ message: 'Old password is incorrect' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+
 module.exports = {
   getAllUsers,
   createUser,
@@ -221,5 +263,6 @@ module.exports = {
   updateUserById,
   deleteUserById,
   getMe,
+  changePassword,
   updateUser
 };

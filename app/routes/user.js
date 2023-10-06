@@ -24,7 +24,22 @@ router.get("/me", usersController.getMe);
 router.post("/register", upload.single("photo"), usersController.createUser);
 
 // Route: Post/update
-router.post("/updateUser", usersController.updateUser);
+
+
+const storageu = multer.diskStorage({
+  destination: "./app/upload",
+  filename: function (req, file, cb) {
+    const fileName = file.originalname.toLocaleLowerCase().split(" ").join("-");
+    cb(null, Date.now() + fileName);
+  },
+});
+
+const uploadu = multer({ storage: storageu });
+
+router.post("/updateUser",uploadu.single("photo"), usersController.updateUser);
+
+router.post("/changePassword", usersController.changePassword);
+
 
 
 // Route: GET /users/:id
