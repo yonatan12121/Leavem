@@ -474,6 +474,68 @@ const getApprovedLeavesForCurrentMonth = async (req, res) => {
   }
 };
 
+const getLeaveSummaryForMonth = async (req, res) => {
+  try {
+    // Get the current month and year
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // Adding 1 because getMonth() returns zero-based months (0 for January)
+    const currentYear = currentDate.getFullYear();
+
+    // Find all approved and declined leave requests for the current month and year
+    const leaveRequests = await Leave.find({
+      status: { $in: ['approved', 'declined'] },
+      $expr: {
+        $and: [
+          { $eq: [{ $year: '$start_date' }, currentYear] },
+          { $eq: [{ $month: '$start_date' }, currentMonth] },
+        ],
+      },
+    });
+
+    // Create an array to store user statistics with name and department
+    const userStatsArray = [];
+
+    // Iterate through leave requests to collect user statistics
+    for (const request of leaveRequests) {
+      const userId = request.Id.toString();
+      const userName = request.userName; // Assuming you have a field for user name in the Leave model
+      const userDepartment = request.userDepartment; // Assuming you have a field for department in the Leave model
+
+      // Find the user's statistics object in the userStatsArray, or create one if not found
+      let userStats = userStatsArray.find((stats) => stats.userId === userId);
+
+      if (!userStats) {
+        userStats = {
+          userId,
+          name: userName,
+          department: userDepartment,
+          requested: 0,
+          approved: 0,
+          declined: 0,
+        };
+        userStatsArray.push(userStats);
+      }
+
+      // Increment the requested count
+      userStats.requested++;
+
+      // Increment the approved or declined count based on the request status
+      if (request.status === 'approved') {
+        userStats.approved++;
+      } else if (request.status === 'declined') {
+        userStats.declined++;
+      }
+    }
+
+    res.status(200).json(userStatsArray);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
 module.exports = {
   getAllLeaves,
   createLeave,
@@ -484,4 +546,5 @@ module.exports = {
   approveLeave,
   declineLeave,
   getApprovedLeavesForCurrentMonth,
+  getLeaveSummaryForMonth
 };

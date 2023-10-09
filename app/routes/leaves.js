@@ -31,7 +31,11 @@ router.post("/approve", leavesController.approveLeave);
 
 router.post("/decline", leavesController.declineLeave);
 
-router.get("/approvedmonth", leavesController.getApprovedLeavesForCurrentMonth);
+router.get("/approvedmonth", leavesController.getLeaveSummaryForMonth);
+
+// router.get("/leaveSummery", leavesController.getLeaveSummaryForMonth);
+
+
 
 
 
