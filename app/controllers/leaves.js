@@ -114,6 +114,70 @@ const getAllLeaves = (req, res) => {
 };
 
 // Controller: Create a leave
+// const createLeave = async (req, res) => {
+//   const { _id, Id, duration, leave_type, start_date, end_date, reason } =
+//     req.body;
+//   console.log(Id, duration, leave_type, start_date, end_date, reason);
+
+//   try {
+//     // Get the user from user_id
+//     console.log(_id);
+//     const user = await User.findById(_id);
+//     console.log("heheheh", user);
+//     if (!user) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+
+//     // Check if user already has a pending leave
+//     const hasPendingLeave = await Leave.exists({
+//       Id,
+//       status: "pending",
+//     });
+
+//     if (hasPendingLeave) {
+//       return res
+//         .status(400)
+//         .json({ error: "You already have a pending leave" });
+//     }
+
+//     // Calculate the duration of the leave in days
+//     let leaveDuration = 0; // Change to let to allow reassignment
+//     const startDate = new Date(start_date);
+//     const endDate = new Date(end_date);
+//     const oneDay = 24 * 60 * 60 * 1000;
+
+//     if (startDate.getTime() === endDate.getTime() && duration === "0.5") {
+//       leaveDuration = 0.5;
+//     } else {
+//       leaveDuration = Math.round(Math.abs(endDate - startDate) / oneDay) + 1;
+//     }
+//     // Check if user has enough leave balance
+//     if (user.total_leaves < leaveDuration) {
+//       return res.status(400).json({ error: "Insufficient leave balance" });
+//     }
+//     console.log(req.photo);
+//     const leave = new Leave({
+//       Id: Id,
+//       photo: "http://localhost:5000" + "/upload/request/" + req.file.filename,
+//       duration: leaveDuration,
+//       leave_type: leave_type,
+//       start_date: start_date,
+//       end_date: end_date,
+//       reason: reason,
+//       status: "pending", // Set the default status as 'pending'
+//     });
+//     console.log(leave);
+//     const savedLeave = await leave.save();
+//     // Decrement the leave balance of the user
+//     res.status(201).json(savedLeave);
+//   } catch (error) {
+//     // Log the error message to the console for debugging
+//     console.error("Error:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+
 const createLeave = async (req, res) => {
   const { _id, Id, duration, leave_type, start_date, end_date, reason } =
     req.body;
@@ -121,7 +185,7 @@ const createLeave = async (req, res) => {
 
   try {
     // Get the user from user_id
-    console.log("hbhb");
+    console.log(_id);
     const user = await User.findById(_id);
     console.log("heheheh", user);
     if (!user) {
@@ -141,20 +205,25 @@ const createLeave = async (req, res) => {
     }
 
     // Calculate the duration of the leave in days
-    let leaveDuration = 0; // Change to let to allow reassignment
+    let leaveDuration = 0;
     const startDate = new Date(start_date);
     const endDate = new Date(end_date);
     const oneDay = 24 * 60 * 60 * 1000;
 
-    if (startDate.getTime() === endDate.getTime() && duration === "0.5") {
-      leaveDuration = 0.5;
-    } else {
-      leaveDuration = Math.round(Math.abs(endDate - startDate) / oneDay) + 1;
+    // Loop through the days and check for Sundays to reduce leave duration
+    for (let currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
+      const dayOfWeek = currentDate.getDay(); // Sunday is 0, Monday is 1, ...
+      if (dayOfWeek !== 0) {
+        // If it's not Sunday, increment the leave duration
+        leaveDuration++;
+      }
     }
+
     // Check if user has enough leave balance
     if (user.total_leaves < leaveDuration) {
       return res.status(400).json({ error: "Insufficient leave balance" });
     }
+
     console.log(req.photo);
     const leave = new Leave({
       Id: Id,
@@ -168,6 +237,7 @@ const createLeave = async (req, res) => {
     });
     console.log(leave);
     const savedLeave = await leave.save();
+    
     // Decrement the leave balance of the user
     res.status(201).json(savedLeave);
   } catch (error) {
@@ -369,6 +439,39 @@ const getLeavesByUserId = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
+}; // Replace with the actual path to your model
+const getApprovedLeavesForCurrentMonth = async (req, res) => {
+  console.log("hello");
+  try {
+    // Get the current date
+    const currentDate = new Date();
+
+    // Extract the current month and year
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // Month is zero-based, so add 1
+
+    // Create a date range for the current month
+    const firstDayOfMonth = new Date(currentYear, currentMonth - 1, 1);
+    const lastDayOfMonth = new Date(currentYear, currentMonth, 0);
+    console.log(firstDayOfMonth, lastDayOfMonth);
+    // Query the database for leaves with the same month and status "approved"
+    const approvedLeaves = await Leave.find({
+      status: { $ne: 'pending' },
+      created_at: {
+        $gte: firstDayOfMonth,
+        $lte: lastDayOfMonth,
+      },
+    });
+    console.log(approveLeave);
+    res.status(200).json({ approvedLeaves });
+    return approvedLeaves;
+  } catch (error) {
+    console.error(
+      "Error fetching approved leaves for the current month:",
+      error
+    );
+    throw error;
+  }
 };
 
 module.exports = {
@@ -380,4 +483,5 @@ module.exports = {
   getLeavesByUserId,
   approveLeave,
   declineLeave,
+  getApprovedLeavesForCurrentMonth,
 };

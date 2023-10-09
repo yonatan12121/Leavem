@@ -8,7 +8,12 @@ const NotificationScehma = new mongoose.Schema(
     Date:{
       type: Date,
       default: Date.now,
+    },
+    updated_at:{
+      type:Boolean,
+      default:false
     }
+
     
   }
 )

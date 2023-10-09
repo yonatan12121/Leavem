@@ -31,6 +31,9 @@ router.post("/approve", leavesController.approveLeave);
 
 router.post("/decline", leavesController.declineLeave);
 
+router.get("/approvedmonth", leavesController.getApprovedLeavesForCurrentMonth);
+
+
 
 // Route: GET /leaves/:id
 router.get("/:id", leavesController.getLeaveById);

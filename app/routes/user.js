@@ -41,6 +41,10 @@ router.post("/updateUser",uploadu.single("photo"), usersController.updateUser);
 router.post("/changePassword", usersController.changePassword);
 
 
+router.post("/notifcation", usersController.notificationUpdate);
+
+
+
 
 // Route: GET /users/:id
 router.get("/:id", usersController.getUserById);
