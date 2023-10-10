@@ -289,8 +289,8 @@ const notificationUpdate = async (req, res) => {
     console.log(notification);
     notification.updated_at=true;
 
-    await user.save();
-    res.status(200).json({notification},{ token: token })
+    await user.save(); 
+    res.status(200).json({notification, token: token})
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
