@@ -258,11 +258,39 @@ const notificationUpdate = async (req, res) => {
     if (!notification) {
       return res.status(404).json({ message: "notification not found" });
     }
+    const userWithoutPassword = {
+      Id: user.Id,
+      Notification: user.Notification,
+      created_at: user.created_at,
+      department_id: user.department_id,
+      email: user.email,
+      employment_date: user.employment_date,
+      name: user.name,
+      photo: user.photo,
+      role: user.role,
+      studied: user.studied,
+      total_leaves: user.total_leaves,
+      __v: user.__v,
+      _id: user._id,
+      // Add other fields you want to include
+    };
+
+    const token = jwt.sign(
+      {
+        email: user.email,
+        role: user.role,
+        data:userWithoutPassword
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "9h" }
+    );
+
+
     console.log(notification);
     notification.updated_at=true;
 
     await user.save();
-    res.status(200).json({notification})
+    res.status(200).json({notification},{ token: token })
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
