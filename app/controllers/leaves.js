@@ -273,7 +273,7 @@ const approveLeave = async (req, res) => {
     // Update the status of the leave request to "approved"
     leave.status = "approved";
     await leave.save();
-    if(!leave_type==="Unpaid Leave"){
+    if(leave_type!=="Unpaid Leave"){
     // Decrement the allowed leave days from user's total_leaves
     user.total_leaves -= allowedLeaveDays;
     await user.save();
