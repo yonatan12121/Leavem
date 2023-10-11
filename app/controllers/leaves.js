@@ -252,7 +252,7 @@ const createLeave = async (req, res) => {
 // Controller function to approve a leave request
 const approveLeave = async (req, res) => {
   const { data } = req.body;
-  const { leaveId, Id, allowedLeaveDays } = data;
+  const { leaveId, Id, allowedLeaveDays,leave_type } = data;
   console.log(leaveId, Id, allowedLeaveDays);
   try {
     const leave = await Leave.findById(leaveId);
@@ -273,11 +273,11 @@ const approveLeave = async (req, res) => {
     // Update the status of the leave request to "approved"
     leave.status = "approved";
     await leave.save();
-
+    if(!leave_type==="Unpaid Leave"){
     // Decrement the allowed leave days from user's total_leaves
     user.total_leaves -= allowedLeaveDays;
     await user.save();
-
+    }
     // Create a notification entry for the user
     const notification = {
       text: "Your leave request has been approved.",
