@@ -223,11 +223,19 @@ const createLeave = async (req, res) => {
     if (user.total_leaves < leaveDuration) {
       return res.status(400).json({ error: "Insufficient leave balance" });
     }
+    let photoUrl = ""; // Initialize photo URL variable
+
+    // Check if leave type is 'sick leave' to include file information
+    if (leave_type.toLowerCase() === 'sick leave') {
+      console.log(req.photo);
+      // Assuming req.photo contains the file information
+      photoUrl = "http://192.168.0.63:5000" + "/upload/request/" + req.file.filename;
+    }
 
     const leave = new Leave({
       Id: Id,
       // Update photo URL as per your requirement
-      photo: "http://localhost:5000" + "/upload/request/" + req.file.filename,
+      photo: photoUrl,
       duration: leaveDuration,
       leave_type: leave_type,
       start_date: start_date,
