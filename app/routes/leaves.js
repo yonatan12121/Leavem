@@ -35,6 +35,7 @@ const multer = require("multer");
 
 router.get("/", leavesController.getAllLeaves);
 
+router.post("/update", leavesController.updateLeave);
 
 
 
