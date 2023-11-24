@@ -339,6 +339,65 @@ const declineLeave = async (req, res) => {
   }
 };
 
+const updateLeave = async (req, res) => {
+  const { data } = req.body;
+  const { leaveId, Id, leave_type, status, reason, allowedLeaveDays } = data;
+
+  try {
+    const leave = await Leave.findById(leaveId);
+
+    if (!leave) {
+      return res.status(404).json({ error: "Leave request not found" });
+    }
+
+    // Fetch the user associated with the leave request
+    const user = await User.findOne({ Id });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (status === "approved") {
+      // Update the status of the leave request to "approved"
+      leave.status = "approved";
+      if (leave_type !== "Unpaid Leave") {
+        // If approved and not Unpaid Leave, decrement allowed leave days from user's total_leaves
+        user.total_leaves -= allowedLeaveDays;
+
+        // Create a notification for an approved leave request
+        const notification = {
+          text: "Update Your leave request has been approved.",
+          name: "Leave Request",
+          type: "approved",
+        };
+        user.Notification.push(notification);
+      }
+    } else if (status === "declined") {
+      // Update the status of the leave request to "declined" and update reason
+      leave.status = "declined";
+      leave.reason = reason;
+
+      // Create a notification for a declined leave request
+      const notification = {
+        text: "update "+reason,
+        name: "Leave Request",
+        type: "declined",
+      };
+      user.Notification.push(notification);
+    }
+
+    // Save the updated leave status, reason, and user's leaves
+    await leave.save();
+    await user.save();
+
+    res.status(200).json({ message: `Leave request ${status} successfully` });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
 // Controller: Get a leave by ID
 const getLeaveById = (req, res) => {
   const { id } = req.params;
@@ -545,6 +604,7 @@ module.exports = {
   getLeavesByUserId,
   approveLeave,
   declineLeave,
+  updateLeave,
   getApprovedLeavesForCurrentMonth,
   getLeaveSummaryForMonth
 };
