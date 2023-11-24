@@ -201,7 +201,7 @@ const createLeave = async (req, res) => {
 
     let leaveDuration = 0;
 
-    if (duration === 0.5) {
+    if (duration === "0.5") {
       leaveDuration = 0.5; // Assign the leave duration directly if it's 0.5
     } else {
       const startDate = new Date(start_date);
