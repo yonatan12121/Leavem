@@ -7,15 +7,15 @@ const jwt = require("jsonwebtoken");
 const createUser = async (req, res) => {
   // console.log(req);
   const role = "user";
-  const { email, fullName, password, studied, department, employment_date } =
+  const {fullName,employment_date,Id } =
     req.body;
-  console.log(email);
-  const encreptedPassword = await bcrypt.hash(password, 10);
+  console.log(Id);
+  const encreptedPassword = await bcrypt.hash("12345678", 10);
   try {
     // Check if email already exists
-    const existingUser = await User.findOne({ email: email });
+    const existingUser = await User.findOne({ Id: Id });
     if (existingUser) {
-      return res.status(400).json({ msg: "Email already exists" });
+      return res.status(400).json({ msg: "User already exists" });
     }
 
     const employmentDate = new Date(req.body.employment_date);
@@ -33,12 +33,9 @@ const createUser = async (req, res) => {
 
     const user = new User({
       name: fullName,
-      email: email,
-      photo: "http://localhost:5000" + "/upload/" + req.file.filename,
-      studied: studied,
+      Id:Id,
       role: role,
       password: encreptedPassword,
-      department_id: department,
       employment_date: employment_date,
       employment_status: "active",
       total_leaves: totalLeaves,
@@ -243,6 +240,7 @@ const changePassword = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const notificationUpdate = async (req, res) => {
   try {

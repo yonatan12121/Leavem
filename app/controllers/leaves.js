@@ -206,6 +206,10 @@ const createLeave = async (req, res) => {
 
     // Calculate the duration of the leave in days
     let leaveDuration = 0;
+    if (duration === 0.5) {
+      leaveDuration = 0.5; 
+    }
+    else{
     const startDate = new Date(start_date);
     const endDate = new Date(end_date);
     const oneDay = 24 * 60 * 60 * 1000;
@@ -218,7 +222,7 @@ const createLeave = async (req, res) => {
         leaveDuration++;
       }
     }
-
+  }
     // Check if user has enough leave balance
     if (user.total_leaves < leaveDuration) {
       return res.status(400).json({ error: "Insufficient leave balance" });
@@ -299,7 +303,7 @@ const approveLeave = async (req, res) => {
 const declineLeave = async (req, res) => {
   // const leaveId = req.params.id; // Get the leave request ID from the URL parameter
   const { data } = req.body;
-  const { leaveId, Id } = data;
+  const { leaveId, Id ,reason } = data;
 
   try {
     const leave = await Leave.findById(leaveId);
@@ -325,7 +329,7 @@ const declineLeave = async (req, res) => {
 
     // Create a notification entry for the user
     const notification = {
-      text: "Your leave request has been declined.",
+      text: reason,
       name: "Leave Request",
       type: "declined",
     };

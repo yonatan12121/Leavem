@@ -6,6 +6,8 @@ const leaveSchema = new mongoose.Schema({
   duration:String,
   start_date: Date,
   end_date: Date,
+  start_time: String,
+  end_time: String,
   reason: String,
   photo: String,
   status: String,

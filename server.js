@@ -5,6 +5,8 @@ const express = require("express");
 
 const app = express();
 const cors = require("cors");
+const swaggerDocs =require("./swagger")
+
 
 //all the routes
 const userRouter = require("./app/routes/user");
@@ -39,3 +41,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`app started on port ${PORT}`);
 });
+swaggerDocs(app, PORT)

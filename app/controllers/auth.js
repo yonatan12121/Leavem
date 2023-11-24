@@ -59,18 +59,18 @@ const Id = email;
 
 const ResetPassword = async (req, res) => {
   try {
-    const { newPassword, email } = req.body;
-    console.log(newPassword, email);
+    const { newPassword, Id } = req.body;
+    console.log(newPassword, Id);
     const encreptedPassword = await bcrypt.hash(newPassword, 10);
 console.log(encreptedPassword);
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ Id });
 if (!existingUser) {
 return res.status(404).json({ message: 'User not found' });
 }
 
     // Use the updateOne method with async/await
     const result = await User.updateOne(
-      { email: email },
+      { Id: Id },
       { $set: { password: encreptedPassword } }
     );
       console.log(result);

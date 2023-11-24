@@ -5,14 +5,121 @@ const leavesController = require("../controllers/leaves");
 
 const multer = require("multer");
 
-// Route: GET /leaves
+/**
+ * @openapi
+ * /leave:
+ *   get:
+ *     tags:
+ *     - leaves
+ *     summary: Get all leaves
+ *     responses:
+ *       200:
+ *         description: Returns a list of all leaves
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *              
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 error:
+ *                   type: string
+ */
+
 router.get("/", leavesController.getAllLeaves);
 
 
 
 
 // Route: POST /leaves
-
+/**
+ * @openapi
+ * /leave/request:
+ *   post:
+ *     tags:
+ *     - leaves
+ *     summary: Create a leave request
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               _id:
+ *                 type: string
+ *               Id:
+ *                 type: string
+ *               duration:
+ *                 type: number
+ *               leave_type:
+ *                 type: string
+ *               start_date:
+ *                 type: string
+ *                 format: date
+ *               end_date:
+ *                 type: string
+ *                 format: date
+ *               reason:
+ *                 type: string
+ *             required:
+ *               - _id
+ *               - Id
+ *               - duration
+ *               - leave_type
+ *               - start_date
+ *               - end_date
+ *               - reason
+ *     responses:
+ *       201:
+ *         description: Leave request created successfully
+ *         content:
+ *           application/json:
+ *           
+ *       400:
+ *         description: Bad request or insufficient leave balance
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       409:
+ *         description: User already has a pending leave
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
 
 const storagele = multer.diskStorage({
     destination: "./app/upload/request",
