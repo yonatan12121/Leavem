@@ -179,15 +179,12 @@ const getAllLeaves = (req, res) => {
 
 
 const createLeave = async (req, res) => {
-  const { _id, Id, duration, leave_type, start_date, end_date, reason } =
-    req.body;
-  console.log(Id, duration, leave_type, start_date, end_date, reason);
+  const { _id, Id, duration, leave_type, start_date, end_date, reason } = req.body;
 
   try {
     // Get the user from user_id
-    console.log(_id);
     const user = await User.findById(_id);
-    console.log("heheheh", user);
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -199,57 +196,56 @@ const createLeave = async (req, res) => {
     });
 
     if (hasPendingLeave) {
-      return res
-        .status(400)
-        .json({ error: "You already have a pending leave" });
+      return res.status(400).json({ error: "You already have a pending leave" });
     }
 
-    // Calculate the duration of the leave in days
     let leaveDuration = 0;
-    if (duration === 0.5) {
-      leaveDuration = 0.5; 
-    }
-    else{
-    const startDate = new Date(start_date);
-    const endDate = new Date(end_date);
-    const oneDay = 24 * 60 * 60 * 1000;
 
-    // Loop through the days and check for Sundays to reduce leave duration
-    for (let currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
-      const dayOfWeek = currentDate.getDay(); // Sunday is 0, Monday is 1, ...
-      if (dayOfWeek !== 0) {
-        // If it's not Sunday, increment the leave duration
-        leaveDuration++;
+    if (duration === 0.5) {
+      leaveDuration = 0.5; // Assign the leave duration directly if it's 0.5
+    } else {
+      const startDate = new Date(start_date);
+      const endDate = new Date(end_date);
+
+      // Calculate the duration in days
+      const oneDay = 24 * 60 * 60 * 1000;
+
+      for (let currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
+        const dayOfWeek = currentDate.getDay(); // Sunday is 0, Monday is 1, ...
+        if (dayOfWeek !== 0) {
+          // If it's not Sunday, increment the leave duration
+          leaveDuration++;
+        }
       }
     }
-  }
+
     // Check if user has enough leave balance
     if (user.total_leaves < leaveDuration) {
       return res.status(400).json({ error: "Insufficient leave balance" });
     }
 
-    console.log(req.photo);
     const leave = new Leave({
       Id: Id,
+      // Update photo URL as per your requirement
       photo: "http://localhost:5000" + "/upload/request/" + req.file.filename,
       duration: leaveDuration,
       leave_type: leave_type,
       start_date: start_date,
       end_date: end_date,
       reason: reason,
-      status: "pending", // Set the default status as 'pending'
+      status: "pending",
     });
-    console.log(leave);
+
     const savedLeave = await leave.save();
     
     // Decrement the leave balance of the user
     res.status(201).json(savedLeave);
   } catch (error) {
-    // Log the error message to the console for debugging
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 // Assuming you have a Leave model and a User model imported.
 
